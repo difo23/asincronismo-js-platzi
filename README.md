@@ -203,12 +203,9 @@ Segunda peticion : https://rickandmortyapi.com/api/location/1
 
 <body>
     <h1> Results: </h1>
-
     <ul id='root'>
-
         <!-- Results -->
     </ul>
-
     <script src="./fetchApi.js"></script>
 </body>
 
@@ -217,6 +214,7 @@ Segunda peticion : https://rickandmortyapi.com/api/location/1
 
 ```js
 // API: https://rickandmortyapi.com/api/
+// Uso el html para no installar el modulo fetch en mi node_modules
 
 let url_api = "https://rickandmortyapi.com/api/";
 
@@ -236,7 +234,7 @@ let query = `${url_api_character}?name=${name_character}`;
 // Dimension del pesonaje
 // Segunda peticion : https://rickandmortyapi.com/api/location/1
 
-
+// Uso promesas que no deberia estar permitido segun el objetivo del problema
 const api_fetch = (url_query, callback, name = '') => {
 
     fetch(url_query)
@@ -302,5 +300,138 @@ const get_character_query = (result, name) => {
 
 
 api_fetch(query, get_character_query)
+```
+
+
+
+Errores de mi solucion:
+
+* No tomo en consideracion los errores en los callbacks.
+* Uso fetch que en este caso esta basado en promesas.
+
+Una idea aceptable:
+
+* Mi solucion no toma en cuenta la secuencia de las peteciones luego de la primera, simplemente actualizan el document cuando se completan.  El name + id identifican el componente donde  las fererentes peticiones agregaran informacion al dom. 
+
+
+
+## Solucion del profesor - Oscar
+
+[XMLHttpRequest](https://developer.mozilla.org/es/docs/Web/API/XMLHttpRequest)
+
+```bash
+npm install xmlhttprequest 
+```
+
+```js
+// XMLHttpResquest fue creado por microsoft, actualmente no se usa mucho 
+// El ejemplo de esta clase es ilustrativo para reforzar en concepto de callback. 
+
+let XMLHttpResquest = require('xmlhttpresquest').XMLHttpResquest;
+
+const fetchData = (url_api, callback) => {
+
+    let xhttp = new XMLHttpRequest();
+
+    // Method http, url api, asincronismo true
+    xhttp.open('GET', url_api, true);
+
+
+    // Escuchando  la conexion cambia
+    xhttp.onreadystatechange = (event) => {
+
+        // Necesito conocer el estado de la conexion, desde 0 a 5.
+        // El esdado de completado es readyState == 4
+
+        if (xhttp.readyState === 4) {
+
+            // Comprobamos el estatus ok
+            if (xhttp.status === 200) {
+                callback(null, JSON.stringify(xhttp.responseText))
+
+            } else {
+                const error = new Error('Error:' + url_api)
+                return callback(error, null)
+            }
+        }
+
+    }
+    
+    // por ultimo enviamos la peticion
+  xhttp.send();
+}
+```
+
+10 Plugins esenciales de VSCode para Frontends
+
+> https://platzi.com/blog/10-plugins-esenciales-para-vscodeCode 
+
+Spell Checker - Visual Studio Marketplace
+
+> https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker
+
+# El callback hell
+
+Ideal con el callback es solo tener 3 peticiones, mas de ahi es un infierno, muy mala practica.
+
+```js
+// importamos el modulo para hacer las peticiones
+let XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+// direccion de la API
+let api = 'https://rickandmortyapi.com/api/character/';
+
+// funcion principal
+function fetchData(url_api, callback){
+  // instanciamos la conexion
+  let xhttp = new XMLHttpRequest();
+  // abrir una conexion con el metodo, la ruta y si es asincrono
+  xhttp.open('GET', url_api, true);
+  // validacion del llamado
+  xhttp.onreadystatechange = (event) => {
+    // el state 4 es el ultimo de la peticion
+    if(xhttp.readyState === 4){
+      // verificamos que el status este en 200, que dice que todo bien, no un 400 o 500
+      if(xhttp.status === 200){
+        // el primer valor es el err, y el siguiente el resultado
+        // ejecutamos el callback con el resultado
+        callback(null, JSON.parse(xhttp.responseText));
+      } else {
+        // si no es 200
+        let error = new Error('Error: ' + url_api);
+        // matamos el proceso con un error
+        return callback(error, null);
+      }
+    }
+  }
+  // por ultimo enviamos la peticion
+  xhttp.send();
+}
+
+// primero buscamos la lista de personajes
+fetchData(api, (error1, data1) => {
+  // si error, matamos retornando un error
+  if(error1) return console.error(error1);
+  // luego buscamos en la api el id de Rick
+  fetchData(api + data1.results[0].id, (error2, data2) => {
+    // si error, matamos retornando un error
+    if(error2) return console.error(error2);
+    // por ultimo la consulta a la api que contiene su dimension
+    fetchData(data2.origin.url, (error3, data3) => {
+      // si error, matamos retornando un error
+      if(error3) return console.error(error3);
+      
+      // mostramos los resultados :) 
+      console.log(data1.info.count);
+      console.log(data2.name);
+      console.log(data3.dimension);
+      
+      // rutas de las peticiones en orden
+      console.log(api);
+      console.log(api + data1.results[0].id); 
+      console.log(data2.origin.url); 
+    
+    });
+  });
+});
 ```
 

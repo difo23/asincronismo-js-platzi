@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "callback": "node src/callback/index.js",
     "callback:fetch": "node src/callback/xmlhttpresponse.js",
-    "promise": "node src/promesas/index.js"
+    "promise": "node src/promesas/index.js",
+    "promise:challenge": "node src/promesas/promis_fetch.js",
+    "async-await": "node src/async-await/index.js",
+    "async-await:challenge": "node src/async-await/challenge.js"
   },
   "keywords": [
     "js",

@@ -1,3 +1,7 @@
+
+// Otra version del reto usando https en vez de xmlhttpresponse
+
+/*
 const https = require("https");
 const API_BASE = 'https://rickandmortyapi.com/api/';
 
@@ -33,13 +37,11 @@ APIRequest(API_BASE + 'character/')
     .catch((error) => console.error(error));
 
 
+*/
 
 
 
-
-
-
-//Las peticiones
+//Las peticiones Ejemplo del curso - Oscar
 
 // importamos la funcion
 const fetchData = require('../utils/fetchData');
